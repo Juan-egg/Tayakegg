@@ -1,0 +1,38 @@
+{
+    "2026-05-19": {
+        "papa": 1430.0,
+        "tomate": 3763.64,
+        "cebolla": 2520.0,
+        "zanahoria": 1408.0,
+        "platano": 2140.0,
+        "yuca": 2820.0,
+        "habichuela": 1533.33,
+        "huevo": 420.33,
+        "limon": 4500.0,
+        "mazorca": 1092.0
+    },
+    "2026-05-20": {
+        "papa": 10000.0,
+        "tomate": 5000.0,
+        "cebolla": 2400.0,
+        "zanahoria": 1600.0,
+        "platano": 2000.0,
+        "yuca": 3000.0,
+        "habichuela": 1333.33,
+        "huevo": 433.33,
+        "limon": 12000.0,
+        "mazorca": 1200.0
+    },
+    "2026-05-21": {
+        "papa": 1380.0,
+        "tomate": 9000.0,
+        "cebolla": 2350.0,
+        "zanahoria": 1550.0,
+        "platano": 1950.0,
+        "yuca": 2900.0,
+        "habichuela": 1400.0,
+        "huevo": 440.0,
+        "limon": 4800.0,
+        "mazorca": 1150.0
+    }
+}
