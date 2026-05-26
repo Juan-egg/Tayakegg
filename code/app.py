@@ -37,126 +37,254 @@ if "pagina" not in st.session_state:
 
 
 def pagina_login():
-    st.title("🍽️ TAYAKEGG")
-    st.subheader("Sistema de alertas de precios — Cali")
-    st.divider()
 
-    # Bloquear si ya agotó intentos
-    if st.session_state.intentos >= pruebas.MAX_INTENTOS:
-        st.error("X Demasiados intentos. Reinicia la app.")
-        return
+    # Espacio arriba para centrar verticalmente
+    st.markdown("<br><br><br>", unsafe_allow_html=True)
 
-    contrasena = st.text_input(
-        "Contraseña:",
-        type="password",
-        placeholder="Ingresa la contraseña del sistema"
-    )
+    # Columnas para centrar horizontalmente
+    col_izq, col_centro, col_der = st.columns([1, 1.5, 1])
 
-    if st.button("Entrar", type="primary"):
-        if contrasena.strip() == "":
-            st.warning("Por favor, ingresa una contraseña.")
-        elif len(contrasena) < 6:
-            st.error("La contraseña debe tener al menos 6 caracteres.")
-            st.session_state.intentos += 1
+    with col_centro:
+        with st.container(border=True):
 
-        # Validación 3: demasiado larga
-        elif len(contrasena) > 12:
-            st.error("La contraseña no puede tener más de 12 caracteres.")
-            st.session_state.intentos += 1
+            # Título
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.title("🍽️ TAYAKEGG")
+            st.caption("Sistema de alertas de precios — Cali")
+            st.divider()
 
-        # Validación 4: contiene espacios
-        elif " " in contrasena:
-            st.error("La contraseña no puede contener espacios.")
-            st.session_state.intentos += 1
+            # Bloquear si agotó intentos
+            if st.session_state.intentos >= pruebas.MAX_INTENTOS:
+                st.error("Demasiados intentos. Reinicia la app.")
+                return
 
-        # Validación 5: comparar con la correcta
-        elif contrasena == pruebas.CONTRASENA:
-            st.session_state.autenticado = True
-            st.session_state.intentos = 0
-            st.rerun()
-        else:
-            st.session_state.intentos += 1
-            restantes = pruebas.MAX_INTENTOS - st.session_state.intentos
-            if restantes > 0:
-                st.error(f"Contraseña incorrecta. Te quedan {restantes} intento(s).")
-            else:
-                st.error("X Demasiados intentos. Sistema bloqueado.")
+            # Campo de contraseña
+            st.markdown("**Contraseña de acceso**")
+            contrasena = st.text_input(
+                "Contraseña",
+                type="password",
+                placeholder="Ingresa tu clave de acceso",
+                label_visibility="collapsed"
+            )
 
+            # Espacio para mensajes de error
+            mensaje = st.empty()
+
+            st.markdown("<br>", unsafe_allow_html=True)
+
+            # Botón
+            entrar = st.button(
+                "ACCEDER AL SISTEMA",
+                type="primary",
+                use_container_width=True
+            )
+
+            st.markdown("<br>", unsafe_allow_html=True)
+
+            # Lógica del botón
+            if entrar:
+                if contrasena.strip() == "":
+                    mensaje.warning("Ingresa una contraseña.")
+                elif len(contrasena) < 6:
+                    mensaje.error("La contraseña debe tener al menos 6 caracteres.")
+                    st.session_state.intentos += 1
+                elif len(contrasena) > 20:
+                    mensaje.error("La contraseña no puede tener más de 20 caracteres.")
+                    st.session_state.intentos += 1
+                elif " " in contrasena:
+                    mensaje.error("La contraseña no puede contener espacios.")
+                    st.session_state.intentos += 1
+                elif contrasena == pruebas.CONTRASENA:
+                    st.session_state.autenticado = True
+                    st.session_state.intentos = 0
+                    st.rerun()
+                else:
+                    st.session_state.intentos += 1
+                    restantes = pruebas.MAX_INTENTOS - st.session_state.intentos
+                    if restantes > 0:
+                        mensaje.error(f"✗ Contraseña incorrecta. Te quedan {restantes} intento(s).")
+                    else:
+                        mensaje.error("Demasiados intentos. Sistema bloqueado.")
+
+            # Pie del formulario
+            st.divider()
+            st.caption(f"📅 {datetime.now().strftime('%d/%m/%Y %H:%M')}  |  Cali, Colombia")
 
 
 # INGRESAR PRECIOS
 
 def pagina_precios():
-    st.header("Ingresar Precio del Día")
-    st.caption(f"Fecha: {datetime.now().strftime('%d/%m/%Y')}")
+
+    # Encabezado
+    col_titulo, col_fecha = st.columns([3, 1])
+    with col_titulo:
+        st.title("Ingresar Precio del Día")
+    with col_fecha:
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.info(f"📅 {datetime.now().strftime('%d/%m/%Y')}")
+
     st.divider()
 
-    # Lista de alimentos disponibles
-    alimentos_disponibles = [
-        "papa", "tomate", "cebolla", "zanahoria",
-        "platano", "yuca", "habichuela", "huevo",
-        "limon", "mazorca"
-    ]
+    # Lista de alimentos con emojis para hacerlo más visual
+    alimentos = {
+        "papa"      : "🥔 Papa",
+        "tomate"    : "🍅 Tomate",
+        "cebolla"   : "🧅 Cebolla",
+        "zanahoria" : "🥕 Zanahoria",
+        "platano"   : "🍌 Plátano",
+        "yuca"      : "🌿 Yuca",
+        "habichuela": "🫘 Habichuela",
+        "huevo"     : "🥚 Huevo",
+        "limon"     : "🍋 Limón",
+        "mazorca"   : "🌽 Mazorca",
+        "pollo"     : "🍗 Pollo",
+        "lulo"      : "🍊 Lulo",
+        "arroz"     : "🍚 Arroz",
+        "aceite"    : "🫙 Aceite",
+        "panela"    : "🍯 Panela",
+        "cilantro"  : "🌱 Cilantro",
+    }
 
-    col1, col2 = st.columns(2)
+    # Formulario principal
+    with st.container(border=True):
 
-    with col1:
-        alimento = st.selectbox(
-            "¿Qué alimento quieres registrar?",
-            options=alimentos_disponibles
+        st.subheader("Registrar precio")
+        st.caption("Ingresa el precio por kg que pagaste hoy en el mercado")
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            alimento_display = st.selectbox(
+                "Selecciona el alimento:",
+                options=list(alimentos.values()),
+            )
+            # Convertir el display (con emoji) al key interno
+            alimento_key = [k for k, v in alimentos.items()
+                           if v == alimento_display][0]
+
+        with col2:
+            # Buscar precio de referencia del mercado
+            precio_ref = pruebas.buscar_precio_mercado(alimento_key)
+
+            st.number_input(
+                "Precio por kg ($):",
+                min_value=0,
+                step=100,
+                value=0,
+                key="precio_input",
+                help=f"Referencia del mercado: ${precio_ref:,.0f}/kg" if precio_ref else "Sin referencia"
+            )
+
+        # Mostrar referencia del mercado como orientación
+        if precio_ref:
+            st.caption(f"Precio de referencia en el mercado para {alimento_display}: **${precio_ref:,.0f}/kg**")
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        guardar = st.button(
+            "GUARDAR PRECIO",
+            type="primary",
+            use_container_width=True
         )
 
-    with col2:
-        precio_usuario = st.number_input(
-            "¿Cuánto pagaste por kg? ($)",
-            min_value=0,
-            step=100,
-            value=0
-        )
+    # Lógica del botón
+    if guardar:
+        precio_usuario = st.session_state.precio_input
 
-    if st.button("💾 Guardar precio", type="primary"):
         if precio_usuario == 0:
-            st.warning(" X Ingresa un precio mayor a cero.")
+            st.warning("Ingresa un precio mayor a cero.")
         else:
-            # Buscar precio del mercado
-            precio_mercado = pruebas.buscar_precio_mercado(alimento)
+            pruebas.guardar_precio(alimento_key, float(precio_usuario))
 
-            # Guardar en el historial
-            pruebas.guardar_precio(alimento, float(precio_usuario))
+            st.success(f"Precio guardado: {alimento_display} = ${precio_usuario:,}/kg")
 
-            st.success(f"✅ Precio guardado: {alimento} = ${precio_usuario:,}/kg")
-
-            # Mostrar comparación con el mercado
-            if precio_mercado:
-                diferencia = precio_usuario - precio_mercado
+            # Comparación con el mercado
+            if precio_ref:
+                diferencia = precio_usuario - precio_ref
                 st.divider()
-                col1, col2, col3 = st.columns(3)
-                col1.metric("Tu precio", f"${precio_usuario:,.0f}")
-                col2.metric("Precio mercado", f"${precio_mercado:,.0f}")
+                st.subheader("Comparación con el mercado")
+
+                c1, c2, c3 = st.columns(3)
+
+                c1.metric(
+                    label="Tu precio",
+                    value=f"${precio_usuario:,.0f}",
+                    help="El precio que tú pagaste"
+                )
+
+                c2.metric(
+                    label="Precio mercado",
+                    value=f"${precio_ref:,.0f}",
+                    help="Precio de referencia de la Central de Abastos"
+                )
+
                 if diferencia > 0:
-                    col3.metric(
-                        "Diferencia",
-                        f"${abs(diferencia):,.0f}",
-                        delta=f"+{diferencia:,.0f} más caro",
+                    c3.metric(
+                        label="Diferencia",
+                        value=f"${abs(diferencia):,.0f}",
+                        delta=f"Estás pagando más caro",
                         delta_color="inverse"
                     )
                 elif diferencia < 0:
-                    col3.metric(
-                        "Diferencia",
-                        f"${abs(diferencia):,.0f}",
-                        delta=f"{diferencia:,.0f} más barato",
+                    c3.metric(
+                        label="Diferencia",
+                        value=f"${abs(diferencia):,.0f}",
+                        delta=f"Estás pagando más barato",
                         delta_color="normal"
                     )
                 else:
-                    col3.metric("Diferencia", "$0", delta="Precio exacto")
+                    c3.metric(
+                        label="Diferencia",
+                        value="$0",
+                        delta="Precio exacto del mercado"
+                    )
+
+            # Historial reciente del alimento
+            st.divider()
+            st.subheader(f"Últimos precios de {alimento_display}")
+
+            if os.path.exists(pruebas.RUTA_HISTORIAL):
+                with open(pruebas.RUTA_HISTORIAL, "r", encoding="utf-8") as f:
+                    historial = json.load(f)
+
+                fechas = sorted(historial.keys())
+
+                # Últimos 3 días con dato de ese alimento
+                ultimos = []
+                for fecha in reversed(fechas):
+                    if alimento_key in historial[fecha]:
+                        ultimos.append({
+                            "Fecha": fecha,
+                            "Precio/kg": f"${historial[fecha][alimento_key]:,.0f}"
+                        })
+                    if len(ultimos) == 3:
+                        break
+
+                if ultimos:
+                    cols = st.columns(len(ultimos))
+                    for i, dato in enumerate(ultimos):
+                        cols[i].metric(
+                            label=f"📅 {dato['Fecha']}",
+                            value=dato["Precio/kg"]
+                        )
+                else:
+                    st.info("No hay registros previos de este alimento.")
 
 
 
 # PÁGINA: ALERTAS
 
 def pagina_alertas():
-    st.header("Alertas de Precios")
-    st.caption(f"Análisis del {datetime.now().strftime('%d/%m/%Y')}")
+
+    # Encabezado
+    col_titulo, col_fecha = st.columns([3, 1])
+    with col_titulo:
+        st.title("Alertas de Precios")
+    with col_fecha:
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.info(f"📅 {datetime.now().strftime('%d/%m/%Y')}")
+
     st.divider()
 
     # Leer historial
@@ -173,82 +301,194 @@ def pagina_alertas():
 
     fechas = sorted(historial.keys())
 
-    # Recopilar todos los alimentos que existen en cualquier fecha
+    # Recopilar todos los alimentos
     todos_alimentos = set()
     for fecha in fechas:
         for alimento in historial[fecha].keys():
             todos_alimentos.add(alimento)
 
-    # Para cada alimento, buscar su precio más reciente
-    # y el precio del día anterior a ese
+    # Para cada alimento buscar precio más reciente y anterior
     precios_hoy = {}
     precios_ayer = {}
 
     for alimento in todos_alimentos:
-        # Buscar en qué fechas aparece este alimento
         fechas_con_dato = [f for f in fechas if alimento in historial[f]]
-        
+
         if len(fechas_con_dato) >= 1:
-            # Precio más reciente
             ultima_fecha = fechas_con_dato[-1]
             precios_hoy[alimento] = historial[ultima_fecha][alimento]
-        
+
         if len(fechas_con_dato) >= 2:
-            # Precio anterior al más reciente
             penultima_fecha = fechas_con_dato[-2]
             precios_ayer[alimento] = historial[penultima_fecha][alimento]
 
     if not precios_hoy:
-        st.warning("No hay precios de hoy. Ve a Ingresar Precios primero.")
+        st.warning("No hay precios registrados.")
         return
 
-    # Contadores para el resumen
-    contador_rojas = 0
-    contador_amarillas = 0
-    contador_verdes = 0
+    # Calcular alertas para todos los alimentos
+    resultados = []
 
-    # Mostrar cada alimento
     for ingrediente, precio_actual in precios_hoy.items():
         if ingrediente in precios_ayer:
             precio_anterior = precios_ayer[ingrediente]
-            porcentaje = pruebas.calcular_porcentaje_cambio(precio_actual, precio_anterior)
-            alerta = pruebas.clasificar_alerta(porcentaje)
-
-            # Elegir color según alerta
-            if "ROJA" in alerta:
-                color = "🔴"
-                contador_rojas += 1
-            elif "AMARILLA" in alerta:
-                color = "🟡"
-                contador_amarillas += 1
-            elif "VERDE" in alerta:
-                color = "🟢"
-                contador_verdes += 1
-            else:
-                color = "⚪"
-
-            st.metric(
-                label=f"{color} {ingrediente.upper()} — {alerta}",
-                value=f"${precio_actual:,.0f}/kg",
-                delta=f"{porcentaje:+.1f}% vs ayer (${precio_anterior:,.0f})",
-                delta_color="inverse" if porcentaje > 0 else "normal"
+            porcentaje = pruebas.calcular_porcentaje_cambio(
+                precio_actual, precio_anterior
             )
+            alerta = pruebas.clasificar_alerta(porcentaje)
         else:
-            st.info(f"⚪ {ingrediente.upper()} — Primer registro: ${precio_actual:,.0f}/kg")
+            porcentaje = 0
+            alerta = "PRIMER REGISTRO"
 
-    # Resumen final
-    st.divider()
+        resultados.append({
+            "ingrediente" : ingrediente,
+            "precio_actual": precio_actual,
+            "precio_anterior": precios_ayer.get(ingrediente, None),
+            "porcentaje"  : porcentaje,
+            "alerta"      : alerta,
+        })
+
+    # Ordenar por nivel de alerta — rojas primero
+    orden_alerta = {
+        "ALERTA ROJA"      : 0,
+        "ALERTA AMARILLA"  : 1,
+        "OPORTUNIDAD VERDE": 2,
+        "BAJADA LEVE"      : 3,
+        "PRECIO ESTABLE"   : 4,
+        "PRIMER REGISTRO"  : 5,
+    }
+    resultados.sort(key=lambda x: orden_alerta.get(x["alerta"], 6))
+
+    # Contadores para el resumen
+    contador_rojas    = sum(1 for r in resultados if "ROJA"    in r["alerta"])
+    contador_amarillas = sum(1 for r in resultados if "AMARILLA" in r["alerta"])
+    contador_verdes   = sum(1 for r in resultados if "VERDE"   in r["alerta"]
+                           or "LEVE" in r["alerta"])
+    contador_estables = sum(1 for r in resultados if "ESTABLE" in r["alerta"]
+                           or "REGISTRO" in r["alerta"])
+
+    # RESUMEN ARRIBA
     st.subheader("📋 Resumen del día")
-    c1, c2, c3 = st.columns(3)
-    c1.metric("🔴 Alertas Rojas",    contador_rojas)
-    c2.metric("🟡 Alertas Amarillas", contador_amarillas)
-    c3.metric("🟢 Oportunidades",     contador_verdes)
+    c1, c2, c3, c4 = st.columns(4)
 
+    c1.metric(
+        label="🔴 Críticos",
+        value=contador_rojas,
+        help="Subieron más del 15%"
+    )
+    c2.metric(
+        label="🟡 Precaución",
+        value=contador_amarillas,
+        help="Subieron entre 5% y 15%"
+    )
+    c3.metric(
+        label="🟢 Oportunidades",
+        value=contador_verdes,
+        help="Bajaron más del 5%"
+    )
+    c4.metric(
+        label="⚪ Estables",
+        value=contador_estables,
+        help="Cambio menor al 5%"
+    )
+
+    st.divider()
+    st.subheader("Detalle por alimento")
+    st.caption("Ordenados por nivel de alerta — los más críticos primero")
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # Emojis para cada alimento
+    emojis = {
+        "papa"      : "🥔", "tomate"    : "🍅",
+        "cebolla"   : "🧅", "zanahoria" : "🥕",
+        "platano"   : "🍌", "yuca"      : "🌿",
+        "habichuela": "🫘", "huevo"     : "🥚",
+        "limon"     : "🍋", "mazorca"   : "🌽",
+        "pollo"     : "🍗", "lulo"      : "🍊",
+        "arroz"     : "🍚", "aceite"    : "🫙",
+        "panela"    : "🍯", "cilantro"  : "🌱",
+    }
+
+    # TARJETAS EN FILAS DE 4
+    COLUMNAS = 4
+
+    for i in range(0, len(resultados), COLUMNAS):
+        cols = st.columns(COLUMNAS)
+        grupo = resultados[i : i + COLUMNAS]
+
+        for j, r in enumerate(grupo):
+            with cols[j]:
+                with st.container(border=True):
+
+                    alerta   = r["alerta"]
+                    pct      = r["porcentaje"]
+                    emoji    = emojis.get(r["ingrediente"], "🛒")
+                    nombre   = r["ingrediente"].upper()
+                    precio   = r["precio_actual"]
+                    precio_a = r["precio_anterior"]
+
+                    # Nombre con emoji
+                    st.markdown(f"### {emoji} {nombre}")
+
+                    # Precio actual
+                    if precio_a:
+                        if pct > 0:
+                            st.metric(
+                                label="Precio hoy",
+                                value=f"${precio:,.0f}/kg",
+                                delta=f"+{pct:.1f}% vs ayer",
+                                delta_color="inverse"
+                            )
+                        elif pct < 0:
+                            st.metric(
+                                label="Precio hoy",
+                                value=f"${precio:,.0f}/kg",
+                                delta=f"{pct:.1f}% vs ayer",
+                                delta_color="green"
+                            )
+                        else:
+                            st.metric(
+                                label="Precio hoy",
+                                value=f"${precio:,.0f}/kg",
+                                delta="Sin cambio",
+                                delta_color="off"
+                            )
+                    else:
+                        st.metric(
+                            label="Precio hoy",
+                            value=f"${precio:,.0f}/kg"
+                        )
+                                        
+                    # alerta con color coherente
+                    if "ROJA" in alerta:
+                        st.error(f"🔴 {alerta}")
+                    elif "AMARILLA" in alerta:
+                        st.warning(f"🟡 {alerta}")
+                    elif "VERDE" in alerta:
+                        st.success(f"🟢 {alerta}")
+                    elif "LEVE" in alerta:
+                        st.success(f"🟢 BAJADA LEVE")
+                    elif "ESTABLE" in alerta:
+                        st.info(f"⚪ {alerta}")
+                    else:
+                        st.info(f"⚪ {alerta}")
+
+                    # Precio de ayer como referencia
+                    if precio_a:
+                        st.caption(f"Ayer: ${precio_a:,.0f}/kg")
 
 # SUGERENCIAS
 
 def pagina_sugerencias():
-    st.header("Sugerencias del Día")
+
+    # Encabezado
+    col_titulo, col_fecha = st.columns([3, 1])
+    with col_titulo:
+        st.title("Sugerencias del Día")
+    with col_fecha:
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.info(f"📅 {datetime.now().strftime('%d/%m/%Y')}")
+
     st.divider()
 
     if not os.path.exists(pruebas.RUTA_HISTORIAL):
@@ -267,6 +507,7 @@ def pagina_sugerencias():
     precios_hoy  = historial[fechas[-1]]
     precios_ayer = historial[fechas[-2]]
 
+    # Calcular cambios de todos los alimentos
     cambios = {}
     for alimento in precios_hoy:
         if alimento in precios_ayer:
@@ -279,37 +520,147 @@ def pagina_sugerencias():
         st.warning("No hay alimentos en común entre hoy y ayer.")
         return
 
+    # Emojis
+    emojis = {
+        "papa"      : "🥔", "tomate"    : "🍅",
+        "cebolla"   : "🧅", "zanahoria" : "🥕",
+        "platano"   : "🍌", "yuca"      : "🌿",
+        "habichuela": "🫘", "huevo"     : "🥚",
+        "limon"     : "🍋", "mazorca"   : "🌽",
+        "pollo"     : "🍗", "lulo"      : "🍊",
+        "arroz"     : "🍚", "aceite"    : "🫙",
+        "panela"    : "🍯", "cilantro"  : "🌱",
+    }
+
+    # Alimento que más bajó y más subió
     alimento_baja = min(cambios, key=cambios.get)
     alimento_sube = max(cambios, key=cambios.get)
+
+    
+    st.subheader("Destacados del día")
+    st.markdown("<br>", unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
 
     with col1:
-        st.success("🟢 MAYOR DESCUENTO DEL DÍA")
-        st.metric(
-            label=alimento_baja.upper(),
-            value=f"${precios_hoy[alimento_baja]:,.0f}/kg",
-            delta=f"{cambios[alimento_baja]:+.1f}%",
-            delta_color="normal"
-        )
-        st.caption("→ Buen momento para comprar más cantidad.")
+        with st.container(border=True):
+            st.success("🟢 MAYOR DESCUENTO DEL DÍA")
+            st.markdown("<br>", unsafe_allow_html=True)
+
+            emoji = emojis.get(alimento_baja, "🛒")
+            st.markdown(f"### {emoji} {alimento_baja.upper()}")
+
+            st.metric(
+                label="Precio hoy",
+                value=f"${precios_hoy[alimento_baja]:,.0f}/kg",
+                delta=f"{cambios[alimento_baja]:+.1f}% vs ayer",
+                delta_color="green"
+            )
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.info("Buen momento para comprar más cantidad y stockearte.")
 
     with col2:
-        st.error("🔴 MAYOR SUBIDA DEL DÍA")
-        st.metric(
-            label=alimento_sube.upper(),
-            value=f"${precios_hoy[alimento_sube]:,.0f}/kg",
-            delta=f"{cambios[alimento_sube]:+.1f}%",
-            delta_color="inverse"
+        with st.container(border=True):
+            st.error("🔴 MAYOR SUBIDA DEL DÍA")
+            st.markdown("<br>", unsafe_allow_html=True)
+
+            emoji = emojis.get(alimento_sube, "🛒")
+            st.markdown(f"### {emoji} {alimento_sube.upper()}")
+
+            st.metric(
+                label="Precio hoy",
+                value=f"${precios_hoy[alimento_sube]:,.0f}/kg",
+                delta=f"{cambios[alimento_sube]:+.1f}% vs ayer",
+                delta_color="inverse"
+            )
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.warning("Considera buscar un sustituto o reducir su uso.")
+
+   
+    # Todos los que bajaron excepto el que ya mostramos arriba
+    oportunidades = {
+        a: pct for a, pct in cambios.items()
+        if pct < 0 and a != alimento_baja
+    }
+
+    if oportunidades:
+        st.divider()
+        st.subheader("Otras oportunidades del día")
+        st.caption("Alimentos que bajaron de precio hoy ordenados de mayor a menor descuento")
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # Ordenar de mayor descuento a menor
+        oportunidades_ordenadas = sorted(
+            oportunidades.items(),
+            key=lambda x: x[1]  # el más negativo primero
         )
-        st.caption("→ Considera buscar un sustituto o reducir uso.")
+
+        COLUMNAS = 4
+        for i in range(0, len(oportunidades_ordenadas), COLUMNAS):
+            cols = st.columns(COLUMNAS)
+            grupo = oportunidades_ordenadas[i : i + COLUMNAS]
+
+            for j, (alimento, pct) in enumerate(grupo):
+                with cols[j]:
+                    with st.container(border=True):
+                        emoji = emojis.get(alimento, "🛒")
+                        st.markdown(f"**{emoji} {alimento.upper()}**")
+                        st.metric(
+                            label="Precio hoy",
+                            value=f"${precios_hoy[alimento]:,.0f}/kg",
+                            delta=f"{pct:.1f}% vs ayer",
+                            delta_color="green"
+                        )
+
+    
+    subidas = {
+        a: pct for a, pct in cambios.items()
+        if pct > 5 and a != alimento_sube
+    }
+
+    if subidas:
+        st.divider()
+        st.subheader("También subieron")
+        st.caption("Alimentos con subida considerable — ten precaución")
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        subidas_ordenadas = sorted(
+            subidas.items(),
+            key=lambda x: x[1],
+            reverse=True  # el que más subió primero
+        )
+
+        COLUMNAS = 4
+        for i in range(0, len(subidas_ordenadas), COLUMNAS):
+            cols = st.columns(COLUMNAS)
+            grupo = subidas_ordenadas[i : i + COLUMNAS]
+
+            for j, (alimento, pct) in enumerate(grupo):
+                with cols[j]:
+                    with st.container(border=True):
+                        emoji = emojis.get(alimento, "🛒")
+                        st.markdown(f"**{emoji} {alimento.upper()}**")
+                        st.metric(
+                            label="Precio hoy",
+                            value=f"${precios_hoy[alimento]:,.0f}/kg",
+                            delta=f"+{pct:.1f}% vs ayer",
+                            delta_color="inverse" 
+                        )
 
 
 
 #  HISTORIAL
 
 def pagina_historial():
-    st.header(" Historial de Precios")
+
+    # Encabezado
+    col_titulo, col_fecha = st.columns([3, 1])
+    with col_titulo:
+        st.title("📅 Historial de Precios")
+    with col_fecha:
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.info(f"📅 {datetime.now().strftime('%d/%m/%Y')}")
+
     st.divider()
 
     if not os.path.exists(pruebas.RUTA_HISTORIAL):
@@ -325,48 +676,144 @@ def pagina_historial():
 
     fechas = sorted(historial.keys())
 
+    # Recopilar todos los alimentos
     todos = set()
     for fecha in fechas:
         for nombre in historial[fecha].keys():
             todos.add(nombre)
 
-    alimento_sel = st.selectbox(
-        "Selecciona un alimento:",
-        options=sorted(todos),
-        key="selector_historial"
-    )
+    # Emojis
+    emojis = {
+        "papa"      : "🥔", "tomate"    : "🍅",
+        "cebolla"   : "🧅", "zanahoria" : "🥕",
+        "platano"   : "🍌", "yuca"      : "🌿",
+        "habichuela": "🫘", "huevo"     : "🥚",
+        "limon"     : "🍋", "mazorca"   : "🌽",
+        "pollo"     : "🍗", "lulo"      : "🍊",
+        "arroz"     : "🍚", "aceite"    : "🫙",
+        "panela"    : "🍯", "cilantro"  : "🌱",
+    }
 
+    # Opciones del selector con emoji
+    opciones = {
+        f"{emojis.get(n, '🛒')} {n.upper()}": n
+        for n in sorted(todos)
+    }
+
+    # ── SELECTOR + MÉTRICAS RÁPIDAS ─────────────────────────
+    col_sel, col_min, col_max, col_prom = st.columns([2, 1, 1, 1])
+
+    with col_sel:
+        alimento_display = st.selectbox(
+            "Selecciona un alimento:",
+            options=list(opciones.keys()),
+            key="selector_historial"
+        )
+        alimento_sel = opciones[alimento_display]
+
+    # Construir datos para ese alimento
     filas = []
     precio_anterior = None
+    precios_lista = []
 
     for fecha in fechas:
         if alimento_sel in historial[fecha]:
             precio = historial[fecha][alimento_sel]
+            precios_lista.append(precio)
+
             if precio_anterior is not None:
-                variacion = pruebas.calcular_porcentaje_cambio(precio, precio_anterior)
+                variacion = pruebas.calcular_porcentaje_cambio(
+                    precio, precio_anterior
+                )
             else:
                 variacion = None
+
             filas.append({
-                "Fecha":     fecha,
+                "Fecha"    : fecha,
                 "Precio/kg": precio,
-                "Variación": f"{variacion:+.1f}%" if variacion is not None else "Primer registro"
+                "Variación": f"{variacion:+.1f}%" if variacion is not None
+                             else "Primer registro"
             })
             precio_anterior = precio
+
+    # Métricas rápidas — se calculan solo si hay datos
+    if precios_lista:
+        precio_min  = min(precios_lista)
+        precio_max  = max(precios_lista)
+        precio_prom = sum(precios_lista) / len(precios_lista)
+
+        with col_min:
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.metric(
+                label="Mínimo",
+                value=f"${precio_min:,.0f}",
+                help="Precio más bajo del período"
+            )
+        with col_max:
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.metric(
+                label="Máximo",
+                value=f"${precio_max:,.0f}",
+                help="Precio más alto del período"
+            )
+        with col_prom:
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.metric(
+                label="Promedio",
+                value=f"${precio_prom:,.0f}",
+                help="Precio promedio del período"
+            )
+
+    st.divider()
 
     if not filas:
         st.info(f"No hay datos de '{alimento_sel}' en el historial.")
         return
 
-    # Gráfico
-    df_grafico = pd.DataFrame(filas).set_index("Fecha")
-    st.line_chart(df_grafico["Precio/kg"], use_container_width=True)
+    # ── GRÁFICO ─────────────────────────────────────────────
+    st.subheader(f"Tendencia de precio — {alimento_display}")
 
-    # Tabla — una sola vez
-    st.subheader("Detalle por fecha")
-    st.dataframe(
-        pd.DataFrame(filas),
+    df_grafico = pd.DataFrame(filas).set_index("Fecha")
+    st.line_chart(
+        df_grafico["Precio/kg"],
         use_container_width=True,
-        hide_index=True
+        height=350,
+    )
+
+    st.divider()
+
+    # ── TABLA DETALLADA ──────────────────────────────────────
+    st.subheader("Detalle por fecha")
+    st.caption(f"Registros disponibles: {len(filas)} días")
+
+    # Agregar columna de tendencia visual
+    filas_display = []
+    for fila in filas:
+        variacion_texto = fila["Variación"]
+        if variacion_texto == "Primer registro":
+            tendencia = "—"
+        elif "+" in variacion_texto:
+            tendencia = "↑ Subió"
+        else:
+            tendencia = "↓ Bajó"
+
+        filas_display.append({
+            "Fecha"    : fila["Fecha"],
+            "Precio/kg": f"${fila['Precio/kg']:,.0f}",
+            "Variación": fila["Variación"],
+            "Tendencia": tendencia,
+        })
+
+    st.dataframe(
+        pd.DataFrame(filas_display),
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "Fecha"    : st.column_config.TextColumn("📅 Fecha"),
+            "Precio/kg": st.column_config.TextColumn("Precio/kg"),
+            "Variación": st.column_config.TextColumn("Variación"),
+            "Tendencia": st.column_config.TextColumn("Tendencia"),
+        }
     )
 
 
@@ -374,9 +821,16 @@ def pagina_historial():
 
 def app_principal():
     with st.sidebar:
-        st.markdown("## 🍽️ TAYAKEGG")
+
+        # Título
+        st.markdown("# 🍽️ TAYAKEGG")
         st.caption("Sistema de alertas de precios")
+        st.caption("Cali, Colombia")
         st.divider()
+
+        # Menú
+        st.markdown("**MENÚ PRINCIPAL**")
+        st.markdown("<br>", unsafe_allow_html=True)
 
         pagina = st.radio(
             "Navegar a:",
@@ -385,16 +839,16 @@ def app_principal():
                 "Alertas",
                 "Sugerencias",
                 "Historial"
-            ]
+            ],
+            label_visibility="collapsed"
         )
 
         st.divider()
-        if st.button("Cerrar sesión"):
-            st.session_state.autenticado = False
-            st.session_state.intentos = 0
-            st.rerun()
 
-        st.caption(f" {datetime.now().strftime('%d/%m/%Y %H:%M')}")
+        # Botón cerrar sesión
+        if st.button("🚪 Cerrar sesión"):
+            st.session_state.autenticado = False
+            st.experimental_rerun()
 
     # Mostrar la página seleccionada
     if pagina == "Ingresar Precios":
