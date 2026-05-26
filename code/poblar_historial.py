@@ -136,7 +136,6 @@ def principal():
     print(f"\n✓ Historial creado en: {RUTA_HISTORIAL}")
     print(f"  Días registrados: {list(historial.keys())}")
     print(f"  Alimentos: {list(precios_hoy.keys())}")
-    print("\n✓ Listo. Ya puedes correr beta.py normalmente.")
     print("-" * 50)
 
 principal()

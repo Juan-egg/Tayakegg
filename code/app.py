@@ -2,7 +2,8 @@ import streamlit as st
 import os
 import json
 import pandas as pd
-from datetime import datetime
+import plotly.graph_objects as go
+from datetime import datetime, timedelta
 
 # Lo mismo que en pruebas.py — fijar directorio
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -35,7 +36,57 @@ if "pagina" not in st.session_state:
     st.session_state.pagina = "Ingresar Precios"
 
 
+def colores_plotly():
+    return {
+        "bg": "#ffffff",
+        "text": "#111111",
+        "grid": "#e6e6e6",
+    }
 
+
+def fig_ganancias(datos_gan, dias=30):
+    c = colores_plotly()
+    hoy = datetime.now()
+    limite = (hoy - timedelta(days=dias)).strftime("%Y-%m-%d")
+    filtrado = {f: v for f, v in datos_gan.items() if f >= limite}
+    if not filtrado:
+        return None
+    fechas = sorted(filtrado.keys())
+    ventas   = [filtrado[f]["ventas"]   for f in fechas]
+    costos   = [filtrado[f]["costo"]    for f in fechas]
+    ganancias= [filtrado[f]["ganancia"] for f in fechas]
+    fechas_fmt = [datetime.strptime(f, "%Y-%m-%d").strftime("%d/%m") for f in fechas]
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=fechas_fmt, y=ventas,    name="Ventas",   marker_color="rgba(59,130,246,0.7)"))
+    fig.add_trace(go.Bar(x=fechas_fmt, y=costos,    name="Costos",   marker_color="rgba(239,68,68,0.6)"))
+    fig.add_trace(go.Scatter(x=fechas_fmt, y=ganancias, name="Ganancia neta",
+                             mode="lines+markers",
+                             line=dict(color="#22c55e", width=2.5),
+                             marker=dict(size=6)))
+    fig.update_layout(
+        plot_bgcolor=c["bg"], paper_bgcolor=c["bg"],
+        font=dict(color=c["text"]),
+        xaxis=dict(showgrid=False),
+        yaxis=dict(gridcolor=c["grid"], tickprefix="$"),
+        barmode="group",
+        legend=dict(orientation="h", y=1.1, font=dict(size=11)),
+        margin=dict(l=10, r=10, t=30, b=10), height=320,
+    )
+    return fig
+
+def guardar_ganancia(fecha_str, ventas, costo):
+    """Guarda ventas y costo del día en un JSON separado."""
+    ruta = "data/ganancias.json"
+    os.makedirs("data", exist_ok=True)
+    if os.path.exists(ruta):
+        with open(ruta, "r", encoding="utf-8") as f:
+            datos = json.load(f)
+    else:
+        datos = {}
+    datos[fecha_str] = {"ventas": ventas, "costo": costo, "ganancia": ventas - costo}
+    with open(ruta, "w", encoding="utf-8") as f:
+        json.dump(datos, f, indent=4, ensure_ascii=False)
 def pagina_login():
 
     # Espacio arriba para centrar verticalmente
@@ -271,6 +322,22 @@ def pagina_precios():
                 else:
                     st.info("No hay registros previos de este alimento.")
 
+
+#Parte de ganancias
+    st.divider()
+    with st.expander("💵 Registrar ventas del día (opcional)"):
+        st.caption("Guarda las ventas y costos para ver gráficos de ganancias")
+        cv1, cv2 = st.columns(2)
+        with cv1:
+            ventas_d = st.number_input("Ventas totales del día ($)", min_value=0, step=1000, key="ventas_dia")
+        with cv2:
+            costo_d = st.number_input("Costo total ingredientes ($)", min_value=0, step=1000, key="costo_dia")
+        if st.button("Guardar ventas del día"):
+            if ventas_d == 0:
+                st.warning("Ingresa un valor de ventas.")
+            else:
+                guardar_ganancia(datetime.now().strftime("%Y-%m-%d"), ventas_d, costo_d)
+                st.success(f"✅ Guardado — Ventas: ${ventas_d:,} | Costo: ${costo_d:,} | Ganancia: ${ventas_d - costo_d:,}")
 
 
 
@@ -702,7 +769,7 @@ def pagina_historial():
         for n in sorted(todos)
     }
 
-    # ── SELECTOR + MÉTRICAS RÁPIDAS ─────────────────────────
+    
     col_sel, col_min, col_max, col_prom = st.columns([2, 1, 1, 1])
 
     with col_sel:
@@ -784,7 +851,7 @@ def pagina_historial():
 
     st.divider()
 
-    # ── TABLA DETALLADA ──────────────────────────────────────
+    
     st.subheader("Detalle por fecha")
     st.caption(f"Registros disponibles: {len(filas)} días")
 
@@ -818,6 +885,85 @@ def pagina_historial():
         }
     )
 
+def cargar_ganancias():
+    ruta = "data/ganancias.json"
+    if not os.path.exists(ruta):
+        return {}
+    with open(ruta, "r", encoding="utf-8") as f:
+        return json.load(f)
+    
+def pagina_ganancias():
+    col_titulo, col_fecha = st.columns([3, 1])
+    with col_titulo:
+        st.title("💵 Ganancias")
+    with col_fecha:
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.info(f"📅 {datetime.now().strftime('%d/%m/%Y')}")
+    st.divider()
+
+    datos = cargar_ganancias()
+    if not datos:
+        st.info("Aún no hay datos de ganancias. Regístralos en 'Ingresar Precios' → sección ventas.")
+        return
+
+    fechas_ord = sorted(datos.keys())
+    hoy = datetime.now()
+
+    # Métricas generales
+    def suma_periodo(dias):
+        limite = (hoy - timedelta(days=dias)).strftime("%Y-%m-%d")
+        return sum(datos[f]["ganancia"] for f in fechas_ord if f >= limite)
+
+    gan_hoy  = datos.get(hoy.strftime("%Y-%m-%d"), {}).get("ganancia", 0)
+    gan_sem  = suma_periodo(7)
+    gan_mes  = suma_periodo(30)
+
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Ganancia hoy",    f"${gan_hoy:,.0f}")
+    c2.metric("Ganancia semana", f"${gan_sem:,.0f}")
+    c3.metric("Ganancia mes",    f"${gan_mes:,.0f}")
+    st.divider()
+
+    # Tabs por período
+    tab_sem, tab_mes, tab_todo = st.tabs(["📅 Últimos 7 días", "📆 Últimos 30 días", "🗓️ Todo el historial"])
+
+    with tab_sem:
+        fig = fig_ganancias(datos, dias=7)
+        if fig:
+            st.plotly_chart(fig, use_container_width=True, key="gan_chart_sem")
+        else:
+            st.info("Sin datos suficientes para la semana.")
+
+    with tab_mes:
+        fig = fig_ganancias(datos, dias=30)
+        if fig:
+            st.plotly_chart(fig, use_container_width=True, key="gan_chart_mes")
+        else:
+            st.info("Sin datos suficientes para el mes.")
+
+    with tab_todo:
+        fig = fig_ganancias(datos, dias=3650)
+        if fig:
+            st.plotly_chart(fig, use_container_width=True, key="gan_chart_todo")
+        else:
+            st.info("Sin datos.")
+
+    # Tabla
+    st.divider()
+    st.subheader("Registro completo")
+    filas_g = []
+    for f in reversed(fechas_ord):
+        d = datos[f]
+        margen = (d["ganancia"] / d["ventas"] * 100) if d.get("ventas", 0) > 0 else 0
+        filas_g.append({
+            "Fecha":       f,
+            "Ventas":      f"${d.get('ventas', 0):,.0f}",
+            "Costo":       f"${d.get('costo', 0):,.0f}",
+            "Ganancia":    f"${d['ganancia']:,.0f}",
+            "Margen (%)":  f"{margen:.1f}%",
+        })
+    st.dataframe(pd.DataFrame(filas_g), use_container_width=True, hide_index=True)
+
 
 # Navegación principal, se muestra la página según lo que haya seleccionado en el menú lateral
 
@@ -840,7 +986,8 @@ def app_principal():
                 "Ingresar Precios",
                 "Alertas",
                 "Sugerencias",
-                "Historial"
+                "Historial",
+                "Ganancias",
             ],
             label_visibility="collapsed"
         )
@@ -861,6 +1008,8 @@ def app_principal():
         pagina_sugerencias()
     elif pagina == "Historial":
         pagina_historial()
+    elif pagina == "Ganancias":
+        pagina_ganancias()
 
 
 

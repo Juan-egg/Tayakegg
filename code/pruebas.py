@@ -19,8 +19,8 @@ RUTA_EXCEL = "data/Precios_sin_hipervinculos.xlsx"
 def guardar_precio(alimento, precio):
     
     #Guarda el precio que pagó el usuario en el historial JSON.
-    #alimento → "tomate", "papa", etc.
-    #precio   → 4500, 1300, etc.
+    #alimento "tomate", "papa", etc.
+    #precio    4500, 1300, etc.
 
     fecha_hoy = datetime.now().strftime("%Y-%m-%d")
 
@@ -132,7 +132,7 @@ def Alertas():
         precios_ayer = {}
 
     print("\n" + "-"*50)
-    print(f"   📊 ANÁLISIS DE PRECIOS - {datetime.now().strftime('%d/%m/%Y')}")
+    print(f"ANÁLISIS DE PRECIOS - {datetime.now().strftime('%d/%m/%Y')}")
     print("-"*50)
     
     # Verificar que recibimos datos
@@ -176,11 +176,11 @@ def Alertas():
             # Ingrediente nuevo que no estaba ayer
             print(f"\n {ingrediente.upper()} (NUEVO)")
             print(f"   Precio actual: ${precio_actual:,.0f}")
-            print(f"   ⚠️ No hay registro del día anterior para comparar.")
+            print(f"No hay registro del día anterior para comparar.")
     
     # Resumen final
     print("\n" + "-"*50)
-    print("📋 RESUMEN DEL DÍA")
+    print("RESUMEN DEL DÍA")
     print("-"*50)
     print(f"🔴 Alertas ROJAS (>15%): {contador_rojas}")
     print(f"🟡 Alertas AMARILLAS (5-15%): {contador_amarillas}")
@@ -258,13 +258,7 @@ def Sugerencias():
 
 def Historial(alimento=None):
     
-    #Muestra el historial de precios guardados.
-      
-    #El parámetro =None significa que es opcional.
-    #Se puede llamar la función así:
-        #Historial()           → muestra todos
-        #Historial("tomate")   → muestra solo tomate
-    
+   
 
     # Leer el historial
     if not os.path.exists(RUTA_HISTORIAL):
@@ -282,7 +276,7 @@ def Historial(alimento=None):
     fechas = sorted(historial.keys())
 
     print("\n" + "-"*50)
-    print("   📅 HISTORIAL DE PRECIOS")
+    print("HISTORIAL DE PRECIOS")
     print("-"*50)
 
     # Leer todos los alimentos que existen en el historial
