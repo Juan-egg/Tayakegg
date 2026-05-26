@@ -848,7 +848,7 @@ def app_principal():
         # Botón cerrar sesión
         if st.button("🚪 Cerrar sesión"):
             st.session_state.autenticado = False
-            st.experimental_rerun()
+            st.rerun()
 
     # Mostrar la página seleccionada
     if pagina == "Ingresar Precios":
