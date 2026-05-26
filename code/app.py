@@ -12,8 +12,8 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 import pruebas
 
 
-# CONFIGURACIÓN INICIAL DE LA APP
-# st.set_page_config SIEMPRE va primero
+# conf inicial de la app
+
 
 st.set_page_config(
     page_title="Tayakegg",
@@ -111,7 +111,7 @@ def pagina_login():
             st.caption(f"📅 {datetime.now().strftime('%d/%m/%Y %H:%M')}  |  Cali, Colombia")
 
 
-# INGRESAR PRECIOS
+
 
 def pagina_precios():
 
@@ -273,7 +273,7 @@ def pagina_precios():
 
 
 
-# PÁGINA: ALERTAS
+
 
 def pagina_alertas():
 
@@ -367,7 +367,7 @@ def pagina_alertas():
     contador_estables = sum(1 for r in resultados if "ESTABLE" in r["alerta"]
                            or "REGISTRO" in r["alerta"])
 
-    # RESUMEN ARRIBA
+  
     st.subheader("📋 Resumen del día")
     c1, c2, c3, c4 = st.columns(4)
 
@@ -409,7 +409,7 @@ def pagina_alertas():
         "panela"    : "🍯", "cilantro"  : "🌱",
     }
 
-    # TARJETAS EN FILAS DE 4
+    
     COLUMNAS = 4
 
     for i in range(0, len(resultados), COLUMNAS):
@@ -477,7 +477,7 @@ def pagina_alertas():
                     if precio_a:
                         st.caption(f"Ayer: ${precio_a:,.0f}/kg")
 
-# SUGERENCIAS
+
 
 def pagina_sugerencias():
 
@@ -520,7 +520,7 @@ def pagina_sugerencias():
         st.warning("No hay alimentos en común entre hoy y ayer.")
         return
 
-    # Emojis
+   
     emojis = {
         "papa"      : "🥔", "tomate"    : "🍅",
         "cebolla"   : "🧅", "zanahoria" : "🥕",
@@ -649,7 +649,9 @@ def pagina_sugerencias():
 
 
 
-#  HISTORIAL
+
+
+
 
 def pagina_historial():
 
@@ -817,7 +819,7 @@ def pagina_historial():
     )
 
 
-# NAVEGACIÓN PRINCIPAL
+# Navegación principal, se muestra la página según lo que haya seleccionado en el menú lateral
 
 def app_principal():
     with st.sidebar:
